@@ -1,0 +1,13 @@
+# IDEs folders
+.idea
+.vscode
+
+# module folders
+/node_modules
+/dist
+
+# Logs
+logs
+*.log
+yarn-debug.log*
+yarn-error.log*
