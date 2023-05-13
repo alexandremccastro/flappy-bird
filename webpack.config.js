@@ -1,33 +1,39 @@
-const { Configuration } = require("webpack");
+const { Configuration } = require('webpack')
 
-const path = require("path");
-const HtmlWebpackPlugin = require("html-webpack-plugin");
-const CopyPlugin = require("copy-webpack-plugin");
+const path = require('path')
+const HtmlWebpackPlugin = require('html-webpack-plugin')
+const CopyPlugin = require('copy-webpack-plugin')
 
 /**
  * @type {Configuration}
  */
 module.exports = {
-  mode: "development",
-  entry: "./src/index.js",
+  mode: 'development',
+  entry: './src/index.ts',
   output: {
-    filename: "bundle.js",
-    path: path.resolve(__dirname, "./dist"),
+    filename: 'bundle.js',
+    path: path.resolve(__dirname, './dist'),
   },
   module: {
-    rules: [{ test: /\.css$/i, use: ["style-loader", "css-loader"] }],
+    rules: [
+      { test: /\.css$/i, use: ['style-loader', 'css-loader'] },
+      { test: /\.ts$/, use: 'ts-loader' },
+    ],
+  },
+  resolve: {
+    extensions: ['.tsx', '.ts', '.js'],
   },
   plugins: [
-    new HtmlWebpackPlugin({ template: "./src/index.html" }),
+    new HtmlWebpackPlugin({ template: './src/index.html' }),
     new CopyPlugin({
-      patterns: [{ from: "./assets", to: "./assets", context: "./src" }],
+      patterns: [{ from: './assets', to: './assets', context: './src' }],
     }),
   ],
   devServer: {
-    port: 8001,
+    port: 8000,
     static: {
-      directory: "./public",
+      directory: './public',
       watch: true,
     },
   },
-};
+}
