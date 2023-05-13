@@ -6,11 +6,13 @@ export default class GameScene extends Phaser.Scene {
 
   private cursor: Phaser.Types.Input.Keyboard.CursorKeys
 
+  private pipes: Phaser.Physics.Arcade.Group
+
   constructor() {
     super({ key: 'GameScene' })
   }
 
-  preload() {
+  public preload() {
     this.load.image('sky', './assets/images/sky.png')
     this.load.image('pipe', './assets/images/pipe.png')
     this.load.spritesheet('bird', './assets/images/bird.png', {
@@ -19,7 +21,7 @@ export default class GameScene extends Phaser.Scene {
     })
   }
 
-  create() {
+  public create() {
     let sky = this.add.image(
       this.cameras.main.width / 2,
       this.cameras.main.height / 2,
@@ -32,8 +34,36 @@ export default class GameScene extends Phaser.Scene {
     let scale = Math.max(scaleX, scaleY)
     sky.setScale(scale).setScrollFactor(0)
 
-    this.bird = this.physics.add.sprite(300, 300, 'bird')
+    let start = 400
+
+    this.pipes = this.physics.add.group()
+
+    for (let i = 0; i <= 4; i++) {
+      const space = Phaser.Math.Between(200, 400)
+
+      const topPipe = this.add
+        .image(start, space, 'pipe')
+        .setOrigin(0, 1)
+        .setScale(2)
+
+      const bottomPipe = this.add
+        .image(start, topPipe.y + 100, 'pipe')
+        .setOrigin(0)
+        .setScale(2)
+
+      start += 500
+      bottomPipe.setAlpha(0.5)
+      this.pipes.add(topPipe)
+      this.pipes.add(bottomPipe)
+    }
+
+    this.bird = this.physics.add.sprite(
+      200,
+      this.cameras.main.height / 2,
+      'bird'
+    )
     this.bird.setCollideWorldBounds(true)
+    this.bird.setGravityY(300)
 
     this.bird.anims.create({
       key: 'idle',
@@ -50,21 +80,61 @@ export default class GameScene extends Phaser.Scene {
     })
 
     this.bird.anims.play('fly')
-    this.bird.setVelocityX(100)
 
     this.cursor = this.input.keyboard.createCursorKeys()
 
-    this.cameras.main.startFollow(this.bird)
+    // this.cameras.main.startFollow(this.bird)
+    this.pipes.setVelocityX(-300)
   }
 
-  update() {
+  public update() {
     if (this.cursor.up.isDown) {
-      this.bird.setVelocityY(-300)
-      this.birdAngle = -45
+      this.bird.setVelocityY(-200)
+      this.birdAngle = -30
     }
 
     this.bird.angle = this.birdAngle
 
-    if (this.birdAngle < 45) this.birdAngle += 0.25
+    if (this.birdAngle < 30) this.birdAngle += 0.15
+
+    this.recyclePipes()
+  }
+
+  private getRightMostPipeX() {
+    let rightMostX = 0
+
+    this.pipes.getChildren().forEach((pipe) => {
+      rightMostX = Math.max(pipe.body.position.x, rightMostX)
+    })
+
+    return rightMostX
+  }
+
+  private recyclePipes() {
+    let recycledPipes: Phaser.GameObjects.Image[] = []
+
+    this.pipes.getChildren().forEach((pipe) => {
+      if (pipe.body.position.x < -200) {
+        recycledPipes.push(pipe as Phaser.GameObjects.Image)
+
+        if (recycledPipes.length == 2) {
+          this.placePipes(recycledPipes[0], recycledPipes[1])
+          recycledPipes = []
+        }
+      }
+    })
+  }
+
+  private placePipes(
+    topPipe: Phaser.GameObjects.Image,
+    bottomPipe: Phaser.GameObjects.Image
+  ) {
+    const rightMostX = this.getRightMostPipeX()
+    const space = Phaser.Math.Between(200, 500)
+
+    topPipe.setY(space)
+    bottomPipe.setY(topPipe.y + 100)
+    topPipe.body.position.x = rightMostX + 500
+    bottomPipe.body.position.x = rightMostX + 500
   }
 }
