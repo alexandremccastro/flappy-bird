@@ -4,13 +4,19 @@ import GameScene from './scenes/game.scene'
 
 const config: Phaser.Types.Core.GameConfig = {
   parent: 'canvas',
-  width: 800,
-  height: 600,
+  width: window.innerWidth,
+  height: window.innerHeight,
   fps: {
-    target: 60,
+    target: 30,
   },
   physics: {
     default: 'arcade',
+    arcade: {
+      gravity: {
+        y: 300,
+      },
+      debug: true,
+    },
   },
   backgroundColor: '#000',
   scene: [GameScene],
